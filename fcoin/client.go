@@ -18,11 +18,18 @@ type Client struct {
 
 	// websocket
 	WS *websocket.Conn
+
+	// PATCH: origin base url ".com" does not work as of 20200829
+	// patch after Authorize:
+	// api, _ := fcoin.Authorize("key", "secret", timeStr) // check README.md
+	// api.APIBase = "https://api.fcoin.pro/v2"
+	APIBase string
 }
 
 func Authorize(key, secret string, localtime int64) (*Client, error) {
 	c := &Client{
-		client: &http.Client{},
+		client:  &http.Client{},
+		APIBase: BaseUrl,
 	}
 
 	// "auth" by checking server time
@@ -45,7 +52,7 @@ func Authorize(key, secret string, localtime int64) (*Client, error) {
 // NOTE: non-zero status code does not cause error
 func (c *Client) request(endpoint string, method string, signReq bool, args interface{}, ret interface{}) error {
 	argStr := ""
-	uri := BaseUrl + endpoint
+	uri := c.APIBase + endpoint
 	req, err := http.NewRequest(method, uri, nil)
 	if err != nil {
 		return err
